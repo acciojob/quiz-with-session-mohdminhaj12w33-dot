@@ -1,56 +1,93 @@
 //your JS code here.
 
-// Do not change code below this line
-// This code will just display the questions to the screen
+// ✅ MUST EXIST before renderQuestions()
+let userAnswers = JSON.parse(sessionStorage.getItem("userAnswers")) || [];
+
 const questions = [
   {
-    question: "What is the capital of France?",
-    choices: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "Paris",
+    question: "Which language runs in a web browser?",
+    choices: ["Java", "C", "Python", "JavaScript"],
+    answer: "JavaScript",
   },
   {
-    question: "What is the highest mountain in the world?",
-    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
-    answer: "Everest",
+    question: "What does CSS stand for?",
+    choices: [
+      "Central Style Sheets",
+      "Cascading Style Sheets",
+      "Cascading Simple Sheets",
+      "Cars SUVs Sailboats",
+    ],
+    answer: "Cascading Style Sheets",
   },
   {
-    question: "What is the largest country by area?",
-    choices: ["Russia", "China", "Canada", "United States"],
-    answer: "Russia",
+    question: "What does HTML stand for?",
+    choices: [
+      "Hypertext Markup Language",
+      "Hyperloop Machine Language",
+      "Helicopters Terminals Motorboats Lamborginis",
+      "None of the above",
+    ],
+    answer: "Hypertext Markup Language",
   },
   {
-    question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars"],
-    answer: "Jupiter",
+    question: "What year was JavaScript launched?",
+    choices: ["1996", "1995", "1994", "none of the above"],
+    answer: "1995",
   },
   {
-    question: "What is the capital of Canada?",
-    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
-    answer: "Ottawa",
+    question: "Which company developed JavaScript?",
+    choices: ["Netscape", "Google", "Microsoft", "Apple"],
+    answer: "Netscape",
   },
 ];
 
-// Display the quiz questions and choices
+const questionsDiv = document.getElementById("questions");
+const scoreDiv = document.getElementById("score");
+const submitBtn = document.getElementById("submit");
+
+// 🔹 Render Questions
 function renderQuestions() {
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    const questionElement = document.createElement("div");
-    const questionText = document.createTextNode(question.question);
-    questionElement.appendChild(questionText);
-    for (let j = 0; j < question.choices.length; j++) {
-      const choice = question.choices[j];
-      const choiceElement = document.createElement("input");
-      choiceElement.setAttribute("type", "radio");
-      choiceElement.setAttribute("name", `question-${i}`);
-      choiceElement.setAttribute("value", choice);
-      if (userAnswers[i] === choice) {
-        choiceElement.setAttribute("checked", true);
+  questionsDiv.innerHTML = "";
+
+  questions.forEach((q, index) => {
+    const qDiv = document.createElement("div");
+    qDiv.innerHTML = `<p>${q.question}</p>`;
+
+    q.choices.forEach(choice => {
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `question-${index}`;
+      input.value = choice;
+
+      if (userAnswers[index] === choice) {
+        input.checked = true;
       }
-      const choiceText = document.createTextNode(choice);
-      questionElement.appendChild(choiceElement);
-      questionElement.appendChild(choiceText);
-    }
-    questionsElement.appendChild(questionElement);
-  }
+
+      input.addEventListener("change", () => {
+        userAnswers[index] = choice;
+        sessionStorage.setItem("userAnswers", JSON.stringify(userAnswers));
+      });
+
+      qDiv.appendChild(input);
+      qDiv.append(choice);
+      qDiv.appendChild(document.createElement("br"));
+    });
+
+    questionsDiv.appendChild(qDiv);
+  });
 }
+
+// 🔹 Calculate Score
+submitBtn.addEventListener("click", () => {
+  let score = 0;
+
+  userAnswers.forEach((ans, i) => {
+    if (ans === questions[i].answer) score++;
+  });
+
+  scoreDiv.textContent = `Your score is ${score} out of 5.`;
+  localStorage.setItem("score", score.toString());
+});
+
+// 🔹 Initial render
 renderQuestions();
