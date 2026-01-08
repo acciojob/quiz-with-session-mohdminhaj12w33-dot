@@ -31,7 +31,7 @@ const questions = [
   },
   {
     question: "Which year was JavaScript launched?",
-    choices: ["1996", "1995", "1994", "none of the above"],
+    choices: ["1996", "1995", "1994", "None of the above"],
     answer: "1995",
   },
 ];
@@ -40,9 +40,10 @@ const questionsDiv = document.getElementById("questions");
 const submitBtn = document.getElementById("submit");
 const scoreDiv = document.getElementById("score");
 
-// load saved answers from sessionStorage
-let userAnswers = JSON.parse(sessionStorage.getItem("userAnswers")) || [];
+// Load progress from sessionStorage
+let progress = JSON.parse(sessionStorage.getItem("progress")) || {};
 
+// Render questions
 function renderQuestions() {
   questionsDiv.innerHTML = "";
 
@@ -56,16 +57,16 @@ function renderQuestions() {
       input.name = `question-${index}`;
       input.value = choice;
 
-      // 🔴 IMPORTANT FOR CYPRESS
-      if (userAnswers[index] === choice) {
+      // Restore checked state
+      if (progress[index] === choice) {
         input.checked = true;
-        input.setAttribute("checked", "true");
+        input.setAttribute("checked", "true"); // required for Cypress
       }
 
       input.addEventListener("click", () => {
-        userAnswers[index] = choice;
-        sessionStorage.setItem("userAnswers", JSON.stringify(userAnswers));
-        renderQuestions(); // re-render to maintain checked attribute
+        progress[index] = choice;
+        sessionStorage.setItem("progress", JSON.stringify(progress));
+        renderQuestions(); // re-render to preserve checked attribute
       });
 
       qDiv.appendChild(document.createElement("br"));
@@ -77,11 +78,12 @@ function renderQuestions() {
   });
 }
 
+// Submit quiz
 submitBtn.addEventListener("click", () => {
   let score = 0;
 
   questions.forEach((q, index) => {
-    if (userAnswers[index] === q.answer) {
+    if (progress[index] === q.answer) {
       score++;
     }
   });
@@ -90,5 +92,11 @@ submitBtn.addEventListener("click", () => {
   localStorage.setItem("score", score.toString());
 });
 
-// initial render
+// Initial render
 renderQuestions();
+
+// Restore score if already submitted
+const savedScore = localStorage.getItem("score");
+if (savedScore !== null) {
+  scoreDiv.textContent = `Your score is ${savedScore} out of 5.`;
+}
